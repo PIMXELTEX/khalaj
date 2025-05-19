@@ -1,0 +1,1203 @@
+{% extends '_base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+جزییات وبلاگ {{ blog.title }}
+{% endblock page_title %}
+
+{% block styles %}
+<style>
+/* Modern Variables */
+:root {
+    --primary-color: #4d9bb3;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+    --dark-text: #333;
+    --light-text: #666;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+}
+
+/* Blog Container */
+.blog-container {
+    background-color: #ffffff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2.5rem;
+    margin: 2rem auto;
+    max-width: 1200px;
+}
+
+/* Blog Header */
+.blog-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.blog-cover {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.blog-cover:hover {
+    transform: scale(1.02);
+}
+
+.blog-title {
+    font-size: 2.5rem;
+    color: var(--dark-text);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.blog-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    color: var(--light-text);
+    margin-bottom: 1.5rem;
+}
+
+.blog-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.blog-meta i {
+    color: var(--primary-color);
+}
+
+/* Blog Content */
+.blog-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--dark-text);
+    margin-bottom: 3rem;
+}
+
+/* Like Button */
+.like-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.like-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.heart-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--secondary-color);
+    transition: var(--transition);
+}
+
+.heart-icon.liked {
+    color: var(--danger-color);
+    transform: scale(1.2);
+}
+
+.like-count {
+    font-size: 1.1rem;
+    color: var(--light-text);
+}
+
+/* Comments Section */
+.comments-section {
+    background-color: var(--light-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-top: 3rem;
+}
+
+.comment-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+}
+
+.comment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.comment-author {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.comment-date {
+    color: var(--light-text);
+    font-size: 0.9rem;
+}
+
+.comment-text {
+    color: var(--dark-text);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* Popups */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+    overflow-y: auto; /* Allow scrolling if content is too tall */
+}
+
+.popup-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    max-width: 500px;
+    width: 90%;
+    margin: 50px auto; /* Fixed margin instead of transform */
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .blog-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .blog-title {
+        font-size: 2rem;
+    }
+    
+    .blog-meta {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .comment-actions {
+        flex-wrap: wrap;
+    }
+    
+    .popup-content {
+        width: 95%;
+        margin: 1rem;
+    }
+}
+
+/* Add notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 15px 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+</style>
+{% endblock styles %}
+
+{% block content %}
+<div class="blog-container" dir="rtl">
+    <div class="blog-header">
+        {% if blog.cover %}
+        <img src="{{ blog.cover.url }}" alt="{{ blog.title }}" class="blog-cover">
+        {% endif %}
+        <h1 class="blog-title">{{ blog.title }}</h1>
+        
+        <div class="blog-meta">
+            <span><i class="fas fa-user"></i> {{ blog.author.username }}</span>
+            <span><i class="fas fa-calendar"></i> {{ blog.created_at_jalali }}</span>
+        </div>
+        
+        {% if user == blog.author %}
+        <div class="blog-actions">
+            <a href="{% url 'blog_update' blog.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> ویرایش پست
+            </a>
+            <a href="{% url 'blog_delete' blog.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> حذف پست
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="blog-content">
+        {{ blog.description|linebreaks }}
+    </div>
+
+    <div class="like-section">
+        <button class="like-btn" data-blog-id="{{ blog.id }}" id="like-btn-{{ blog.id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="heart-icon {% if is_liked %}liked{% endif %}" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        </button>
+        <span class="like-count" id="like-count-{{ blog.id }}">{{ blog.total_likes }}</span>
+    </div>
+
+    <div class="comments-section">
+        <h2 class="mb-4">نظرات</h2>
+        <hr>
+
+        {% for comment in comments %}
+            {% if comment.is_active %}
+            <div class="comment-card" id="comment-{{ comment.id }}">
+                <div class="comment-header">
+                    <span class="comment-author">{{ comment.user }}</span>
+                    <span class="comment-date">{{ comment.datetime_created_jalali }}</span>
+                </div>
+                
+                <div class="comment-text">
+                    {{ comment.text|linebreaks }}
+                </div>
+                
+                <div class="comment-actions">
+                    <button class="btn btn-outline-primary like-comment-btn" data-comment-id="{{ comment.id }}" id="like-comment-btn-{{ comment.id }}">
+                        <i class="fas fa-heart"></i>
+                        <span id="comment-like-count-{{ comment.id }}">{{ comment.total_likes }}</span>
+                    </button>
+                    
+                    {% if comment.user == request.user %}
+                    <button class="btn btn-primary" onclick="openEditPopup({{ comment.id }})">
+                        <i class="fas fa-edit"></i> ویرایش
+                    </button>
+                    <button class="btn btn-danger" onclick="openDeletePopup({{ comment.id }})">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                    {% endif %}
+                    
+                    <button class="btn btn-secondary" onclick="openReplyPopup({{ comment.id }})">
+                        <i class="fas fa-reply"></i> پاسخ
+                    </button>
+                </div>
+
+                {% for reply in comment.reply_set.all %}
+                <div class="comment-card mt-3 ms-4" id="reply-{{ reply.id }}">
+                    <div class="comment-header">
+                        <span class="comment-author">{{ reply.user }}</span>
+                    </div>
+                    <div class="comment-text">
+                        {{ reply.text }}
+                    </div>
+                    {% if reply.user == request.user %}
+                    <div class="comment-actions">
+                        <button class="btn btn-primary" onclick="openEditReplyPopup({{ reply.id }})">
+                            <i class="fas fa-edit"></i> ویرایش
+                        </button>
+                        <button class="btn btn-danger" onclick="openDeleteReplyPopup({{ reply.id }})">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title mb-4">نظر خود را وارد کنید:</h3>
+                <form id="comment-form" method="POST">
+                    {% csrf_token %}
+                    {% if user.is_authenticated %}
+                        {{ comment_form|crispy }}
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fas fa-paper-plane"></i> ارسال نظر
+                        </button>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <h4>شما قادر به گذاشتن کامنت نیستید</h4>
+                            <div class="mt-3">
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-sign-in-alt"></i> ورود
+                                </a>
+                                <a href="{% url 'signup' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-user-plus"></i> ثبت نام
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popups -->
+{% for comment in comments %}
+    {% if comment.is_active %}
+    <div class="popup" id="edit-popup-{{ comment.id }}">
+        <div class="popup-content">
+            <form id="edit-form-{{ comment.id }}" class="edit-form">
+                {% csrf_token %}
+                <textarea name="text" class="form-control mb-3">{{ comment.text }}</textarea>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> تایید
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPopup({{ comment.id }})">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="popup" id="delete-popup-{{ comment.id }}">
+        <div class="popup-content">
+            <form id="delete-form-{{ comment.id }}" class="delete-form">
+                {% csrf_token %}
+                <p>آیا از حذف کامنت "{{ comment.text }}" مطمئن هستید؟</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> بله، حذف کن
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDeletePopup({{ comment.id }})">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="popup" id="reply-popup-{{ comment.id }}">
+        <div class="popup-content">
+            <form id="reply-form-{{ comment.id }}" class="reply-form">
+                {% csrf_token %}
+                <textarea name="text" class="form-control mb-3" placeholder="پاسخ خود را بنویسید..."></textarea>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> تایید
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeReplyPopup({{ comment.id }})">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+<!-- Move reply popups to the end of the content -->
+{% for comment in comments %}
+    {% for reply in comment.reply_set.all %}
+    <div class="popup" id="edit-reply-popup-{{ reply.id }}">
+        <div class="popup-content">
+            <form id="edit-reply-form-{{ reply.id }}" class="edit-reply-form">
+                {% csrf_token %}
+                <textarea name="text" class="form-control mb-3">{{ reply.text }}</textarea>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> تایید
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditReplyPopup({{ reply.id }})">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="popup" id="delete-reply-popup-{{ reply.id }}">
+        <div class="popup-content">
+            <form id="delete-reply-form-{{ reply.id }}" class="delete-reply-form">
+                {% csrf_token %}
+                <p>آیا از حذف پاسخ "{{ reply.text }}" مطمئن هستید؟</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> بله، حذف کن
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteReplyPopup({{ reply.id }})">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+
+<script>
+// Initialize reply form handlers
+function initializeReplyForms() {
+    // Initialize reply edit forms
+    document.querySelectorAll('.edit-reply-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const replyId = this.id.split('-').pop();
+            const text = this.querySelector('textarea[name="text"]').value;
+            
+            fetch(`/khalaj/reply/${replyId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const replyText = document.querySelector(`#reply-${replyId} .comment-text`);
+                    replyText.innerHTML = data.reply.text.replace(/\n/g, '<br>');
+                    closeEditReplyPopup(replyId);
+                    showNotification('پاسخ با موفقیت ویرایش شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ویرایش پاسخ', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ویرایش پاسخ', 'error');
+            });
+        });
+    });
+
+    // Initialize reply delete forms
+    document.querySelectorAll('.delete-reply-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const replyId = this.id.split('-').pop();
+            
+            fetch(`/khalaj/reply/${replyId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const reply = document.getElementById(`reply-${replyId}`);
+                    reply.remove();
+                    closeDeleteReplyPopup(replyId);
+                    showNotification('پاسخ با موفقیت حذف شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در حذف پاسخ', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در حذف پاسخ', 'error');
+            });
+        });
+    });
+}
+
+// Popup functions
+function openEditReplyPopup(replyId) {
+    const popup = document.getElementById(`edit-reply-popup-${replyId}`);
+    popup.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditReplyPopup(replyId) {
+    const popup = document.getElementById(`edit-reply-popup-${replyId}`);
+    popup.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function openDeleteReplyPopup(replyId) {
+    const popup = document.getElementById(`delete-reply-popup-${replyId}`);
+    popup.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteReplyPopup(replyId) {
+    const popup = document.getElementById(`delete-reply-popup-${replyId}`);
+    popup.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Make functions globally available
+window.openEditReplyPopup = openEditReplyPopup;
+window.closeEditReplyPopup = closeEditReplyPopup;
+window.openDeleteReplyPopup = openDeleteReplyPopup;
+window.closeDeleteReplyPopup = closeDeleteReplyPopup;
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize all forms
+    initializeReplyForms();
+    
+    // Add click outside to close functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('popup')) {
+            e.target.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Ensure no popups are open when page loads
+    const popups = document.querySelectorAll('.popup');
+    popups.forEach(popup => popup.style.display = 'none');
+
+    // Like functionality for blog posts
+    const likeButtons = document.querySelectorAll('.like-btn');
+    
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            const blogId = this.dataset.blogId;
+            const likeCountSpan = document.getElementById(`like-count-${blogId}`);
+            const heartIcon = this.querySelector('.heart-icon');
+
+            fetch(`/khalaj/${blogId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    heartIcon.classList.add('liked');
+                } else {
+                    heartIcon.classList.remove('liked');
+                }
+                likeCountSpan.textContent = data.total_likes;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Like functionality for comments
+    const likeCommentButtons = document.querySelectorAll('.like-comment-btn');
+
+    likeCommentButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            const commentId = this.dataset.commentId;
+            const likeCountSpan = document.getElementById(`comment-like-count-${commentId}`);
+            const heartIcon = this.querySelector('.fas.fa-heart');
+
+            fetch(`/khalaj/comment/${commentId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    heartIcon.classList.add('text-danger');
+                } else {
+                    heartIcon.classList.remove('text-danger');
+                }
+                likeCountSpan.textContent = data.total_likes;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Handle new comment submission
+    const commentForm = document.getElementById('comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch('{% url "comment_create" blog.id %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Create new comment element
+                    const commentsSection = document.querySelector('.comments-section');
+                    const commentForm = document.querySelector('.card.mt-4');
+                    const newComment = createCommentElement(data.comment);
+                    
+                    // Insert before the comment form
+                    commentsSection.insertBefore(newComment, commentForm);
+                    
+                    // Clear form
+                    this.reset();
+                    
+                    // Show success message
+                    showNotification('نظر شما با موفقیت ثبت شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ثبت نظر', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ثبت نظر', 'error');
+            });
+        });
+    }
+
+    // Helper function to create comment element with all event listeners
+    function createCommentElement(comment) {
+        const div = document.createElement('div');
+        div.className = 'comment-card';
+        div.id = `comment-${comment.id}`;
+        div.innerHTML = `
+            <div class="comment-header">
+                <span class="comment-author">${comment.user}</span>
+                <span class="comment-date">${comment.datetime_created_jalali}</span>
+            </div>
+            <div class="comment-text">${comment.text.replace(/\n/g, '<br>')}</div>
+            <div class="comment-actions">
+                <button class="btn btn-outline-primary like-comment-btn" data-comment-id="${comment.id}" id="like-comment-btn-${comment.id}">
+                    <i class="fas fa-heart"></i>
+                    <span id="comment-like-count-${comment.id}">0</span>
+                </button>
+                <button class="btn btn-primary" onclick="openEditPopup(${comment.id})">
+                    <i class="fas fa-edit"></i> ویرایش
+                </button>
+                <button class="btn btn-danger" onclick="openDeletePopup(${comment.id})">
+                    <i class="fas fa-trash"></i> حذف
+                </button>
+                <button class="btn btn-secondary" onclick="openReplyPopup(${comment.id})">
+                    <i class="fas fa-reply"></i> پاسخ
+                </button>
+            </div>
+        `;
+
+        // Create and append the edit popup
+        const editPopup = document.createElement('div');
+        editPopup.className = 'popup';
+        editPopup.id = `edit-popup-${comment.id}`;
+        editPopup.innerHTML = `
+            <div class="popup-content">
+                <form id="edit-form-${comment.id}" class="edit-form">
+                    {% csrf_token %}
+                    <textarea name="text" class="form-control mb-3">${comment.text}</textarea>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> تایید
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditPopup(${comment.id})">
+                            <i class="fas fa-times"></i> انصراف
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(editPopup);
+
+        // Create and append the delete popup
+        const deletePopup = document.createElement('div');
+        deletePopup.className = 'popup';
+        deletePopup.id = `delete-popup-${comment.id}`;
+        deletePopup.innerHTML = `
+            <div class="popup-content">
+                <form id="delete-form-${comment.id}" class="delete-form">
+                    {% csrf_token %}
+                    <p>آیا از حذف کامنت "${comment.text}" مطمئن هستید؟</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> بله، حذف کن
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeDeletePopup(${comment.id})">
+                            <i class="fas fa-times"></i> انصراف
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(deletePopup);
+
+        // Create and append the reply popup
+        const replyPopup = document.createElement('div');
+        replyPopup.className = 'popup';
+        replyPopup.id = `reply-popup-${comment.id}`;
+        replyPopup.innerHTML = `
+            <div class="popup-content">
+                <form id="reply-form-${comment.id}" class="reply-form">
+                    {% csrf_token %}
+                    <textarea name="text" class="form-control mb-3" placeholder="پاسخ خود را بنویسید..."></textarea>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> تایید
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeReplyPopup(${comment.id})">
+                            <i class="fas fa-times"></i> انصراف
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(replyPopup);
+
+        // Initialize like button
+        const likeBtn = div.querySelector('.like-comment-btn');
+        likeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const commentId = this.dataset.commentId;
+            const likeCountSpan = document.getElementById(`comment-like-count-${commentId}`);
+            const heartIcon = this.querySelector('.fas.fa-heart');
+
+            fetch(`/khalaj/comment/${commentId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    heartIcon.classList.add('text-danger');
+                } else {
+                    heartIcon.classList.remove('text-danger');
+                }
+                likeCountSpan.textContent = data.total_likes;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Initialize edit form
+        const editForm = editPopup.querySelector('.edit-form');
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = comment.id;
+            const text = this.querySelector('textarea[name="text"]').value;
+            
+            fetch(`/khalaj/comment/${commentId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const commentText = document.querySelector(`#comment-${commentId} .comment-text`);
+                    commentText.innerHTML = data.comment.text.replace(/\n/g, '<br>');
+                    closeEditPopup(commentId);
+                    showNotification('نظر با موفقیت ویرایش شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ویرایش نظر', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ویرایش نظر', 'error');
+            });
+        });
+
+        // Initialize delete form
+        const deleteForm = deletePopup.querySelector('.delete-form');
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = comment.id;
+            
+            fetch(`/khalaj/comment/${commentId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    div.remove();
+                    editPopup.remove();
+                    deletePopup.remove();
+                    replyPopup.remove();
+                    showNotification('نظر با موفقیت حذف شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در حذف نظر', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در حذف نظر', 'error');
+            });
+        });
+
+        // Initialize reply form
+        const replyForm = replyPopup.querySelector('.reply-form');
+        replyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = comment.id;
+            const text = this.querySelector('textarea[name="text"]').value;
+            
+            fetch(`/khalaj/reply/${commentId}/create/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const newReply = createReplyElement(data.reply);
+                    div.appendChild(newReply);
+                    closeReplyPopup(commentId);
+                    this.reset();
+                    showNotification('پاسخ با موفقیت ثبت شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ثبت پاسخ', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ثبت پاسخ', 'error');
+            });
+        });
+
+        return div;
+    }
+
+    // Helper function to create reply element with all event listeners
+    function createReplyElement(reply) {
+        const div = document.createElement('div');
+        div.className = 'comment-card mt-3 ms-4';
+        div.id = `reply-${reply.id}`;
+        div.innerHTML = `
+            <div class="comment-header">
+                <span class="comment-author">${reply.user}</span>
+            </div>
+            <div class="comment-text">${reply.text}</div>
+            <div class="comment-actions">
+                <button class="btn btn-primary" onclick="openEditReplyPopup(${reply.id})">
+                    <i class="fas fa-edit"></i> ویرایش
+                </button>
+                <button class="btn btn-danger" onclick="openDeleteReplyPopup(${reply.id})">
+                    <i class="fas fa-trash"></i> حذف
+                </button>
+            </div>
+        `;
+
+        // Create and append the edit popup
+        const editPopup = document.createElement('div');
+        editPopup.className = 'popup';
+        editPopup.id = `edit-reply-popup-${reply.id}`;
+        editPopup.innerHTML = `
+            <div class="popup-content">
+                <form id="edit-reply-form-${reply.id}" class="edit-reply-form">
+                    {% csrf_token %}
+                    <textarea name="text" class="form-control mb-3">${reply.text}</textarea>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> تایید
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditReplyPopup(${reply.id})">
+                            <i class="fas fa-times"></i> انصراف
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(editPopup);
+
+        // Create and append the delete popup
+        const deletePopup = document.createElement('div');
+        deletePopup.className = 'popup';
+        deletePopup.id = `delete-reply-popup-${reply.id}`;
+        deletePopup.innerHTML = `
+            <div class="popup-content">
+                <form id="delete-reply-form-${reply.id}" class="delete-reply-form">
+                    {% csrf_token %}
+                    <p>آیا از حذف پاسخ "${reply.text}" مطمئن هستید؟</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> بله، حذف کن
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeDeleteReplyPopup(${reply.id})">
+                            <i class="fas fa-times"></i> انصراف
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(deletePopup);
+
+        // Initialize edit form
+        const editForm = editPopup.querySelector('.edit-reply-form');
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const replyId = reply.id;
+            const text = this.querySelector('textarea[name="text"]').value;
+            
+            fetch(`/khalaj/reply/${replyId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const replyText = document.querySelector(`#reply-${replyId} .comment-text`);
+                    replyText.innerHTML = data.reply.text.replace(/\n/g, '<br>');
+                    closeEditReplyPopup(replyId);
+                    showNotification('پاسخ با موفقیت ویرایش شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ویرایش پاسخ', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ویرایش پاسخ', 'error');
+            });
+        });
+
+        // Initialize delete form
+        const deleteForm = deletePopup.querySelector('.delete-reply-form');
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const replyId = reply.id;
+            
+            fetch(`/khalaj/reply/${replyId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    div.remove();
+                    editPopup.remove();
+                    deletePopup.remove();
+                    showNotification('پاسخ با موفقیت حذف شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در حذف پاسخ', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در حذف پاسخ', 'error');
+            });
+        });
+
+        return div;
+    }
+
+    // Helper function to show notifications
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} notification`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Handle edit form submissions
+    document.querySelectorAll('.edit-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = this.id.split('-').pop();
+            const text = this.querySelector('textarea[name="text"]').value;
+            
+            fetch(`/khalaj/comment/${commentId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const commentText = document.querySelector(`#comment-${commentId} .comment-text`);
+                    commentText.innerHTML = data.comment.text.replace(/\n/g, '<br>');
+                    closeEditPopup(commentId);
+                    showNotification('نظر با موفقیت ویرایش شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ویرایش نظر', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ویرایش نظر', 'error');
+            });
+        });
+    });
+
+    // Handle delete form submissions
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = this.id.split('-').pop();
+            
+            fetch(`/khalaj/comment/${commentId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const comment = document.getElementById(`comment-${commentId}`);
+                    comment.remove();
+                    closeDeletePopup(commentId);
+                    showNotification('نظر با موفقیت حذف شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در حذف نظر', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در حذف نظر', 'error');
+            });
+        });
+    });
+
+    // Handle reply form submissions
+    document.querySelectorAll('.reply-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = this.id.split('-').pop();
+            const text = this.querySelector('textarea[name="text"]').value;
+            
+            fetch(`/khalaj/reply/${commentId}/create/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const comment = document.getElementById(`comment-${commentId}`);
+                    const newReply = createReplyElement(data.reply);
+                    comment.appendChild(newReply);
+                    closeReplyPopup(commentId);
+                    showNotification('پاسخ با موفقیت ثبت شد', 'success');
+                } else {
+                    showNotification(data.error || 'خطا در ثبت پاسخ', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('خطا در ثبت پاسخ', 'error');
+            });
+        });
+    });
+});
+
+// Popup functions
+function openEditPopup(commentId) {
+    document.getElementById(`edit-popup-${commentId}`).style.display = 'block';
+}
+
+function closeEditPopup(commentId) {
+    document.getElementById(`edit-popup-${commentId}`).style.display = 'none';
+}
+
+function openDeletePopup(commentId) {
+    document.getElementById(`delete-popup-${commentId}`).style.display = 'block';
+}
+
+function closeDeletePopup(commentId) {
+    document.getElementById(`delete-popup-${commentId}`).style.display = 'none';
+}
+
+function openReplyPopup(commentId) {
+    document.getElementById(`reply-popup-${commentId}`).style.display = 'block';
+}
+
+function closeReplyPopup(commentId) {
+    document.getElementById(`reply-popup-${commentId}`).style.display = 'none';
+}
+</script>
+{% endblock content %}
+
+
+
+ 

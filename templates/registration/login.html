@@ -1,0 +1,196 @@
+{% extends '_base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+{% load socialaccount %}
+
+{% block page_title %}
+Login
+{% endblock page_title %}
+
+{% block styles %}
+<style>
+.login-container {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 40px;
+    margin: 40px auto;
+    max-width: 500px;
+    direction: rtl;
+}
+
+.login-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.login-title {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.login-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-form {
+    width: 100%;
+}
+
+.form-content {
+    margin-bottom: 30px;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    transition: all 0.3s ease;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: #4d9bb3;
+    border-color: #4d9bb3;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3d8ba3;
+    border-color: #3d8ba3;
+}
+
+.btn-link {
+    color: #4d9bb3;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-link:hover {
+    background-color: rgba(77, 155, 179, 0.1);
+    color: #3d8ba3;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4d9bb3;
+    box-shadow: 0 0 0 0.2rem rgba(77, 155, 179, 0.25);
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+}
+
+.alert-danger {
+    background-color: #fff5f5;
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+    
+    .login-title {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock styles %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+        <h1 class="login-title">ورود به حساب</h1>
+        <p class="login-subtitle">خوش آمدید! لطفا وارد شوید</p>
+    </div>
+    
+    <form method="POST" class="login-form">
+        {% csrf_token %}
+        <div class="form-content">
+            {{ form|crispy }}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i>
+                ورود
+            </button>
+            
+            {% get_providers as socialaccount_providers %}
+            {% if socialaccount_providers %}
+            <div class="social-login mt-4">
+                <p class="text-center mb-3">یا ورود با</p>
+                <div class="d-flex justify-content-center gap-3">
+                    {% for provider in socialaccount_providers %}
+                        {% if provider.id == 'google' %}
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger">
+                            <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 20px; height: 20px; margin-right: 8px;">
+                            گوگل
+                        </a>
+                        {% elif provider.id == 'facebook' %}
+                        <a href="{% provider_login_url 'facebook' %}" class="btn btn-outline-primary">
+                            <img src="https://www.facebook.com/favicon.ico" alt="Facebook" style="width: 20px; height: 20px; margin-right: 8px;">
+                            فیسبوک
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="d-flex justify-content-center gap-3 mt-3">
+                <a href="{% url 'signup' %}" class="btn btn-link">
+                    <i class="fas fa-user-plus"></i>
+                    ثبت نام
+                </a>
+                <a href="{% url 'password_reset' %}" class="btn btn-link">
+                    <i class="fas fa-key"></i>
+                    فراموشی رمز عبور
+                </a>
+            </div>
+        </div>
+    </form>
+
+    {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                <p class="mb-0">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

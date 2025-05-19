@@ -1,0 +1,152 @@
+{% extends '_base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+تایید کد
+{% endblock page_title %}
+
+{% block styles %}
+<style>
+.verify-container {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 40px;
+    margin: 40px auto;
+    max-width: 500px;
+    direction: rtl;
+}
+
+.verify-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.verify-title {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.verify-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.verify-form {
+    width: 100%;
+}
+
+.form-content {
+    margin-bottom: 30px;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    transition: all 0.3s ease;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: #4d9bb3;
+    border-color: #4d9bb3;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3d8ba3;
+    border-color: #3d8ba3;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4d9bb3;
+    box-shadow: 0 0 0 0.2rem rgba(77, 155, 179, 0.25);
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+}
+
+.alert-warning {
+    background-color: #fff8e1;
+    color: #856404;
+}
+
+@media (max-width: 768px) {
+    .verify-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+    
+    .verify-title {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock styles %}
+
+{% block content %}
+<div class="verify-container">
+    <div class="verify-header">
+        <h1 class="verify-title">تایید کد</h1>
+        <p class="verify-subtitle">کد تایید ارسال شده را وارد کنید</p>
+    </div>
+
+    <form method="POST" class="verify-form">
+        {% csrf_token %}
+        <div class="form-content">
+            <div class="mb-3">
+                <label for="verification_code" class="form-label">کد تایید را وارد کنید:</label>
+                <input type="text" name="verification_code" class="form-control text-end" required>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check-circle"></i>
+                تایید کد
+            </button>
+        </div>
+    </form>
+
+    {% if messages %}
+        <div class="alert alert-warning">
+            {% for message in messages %}
+                <p class="mb-0">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
